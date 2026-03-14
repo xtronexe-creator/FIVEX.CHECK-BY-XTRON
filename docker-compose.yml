@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: fivex-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-fivex_check}
+      MYSQL_USER: ${MYSQL_USER:-fivex_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-fivex_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - fivex-network
+
+  # FiveX.check Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fivex-app
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_URL: mysql://${MYSQL_USER:-fivex_user}:${MYSQL_PASSWORD:-fivex_password}@mysql:3306/${MYSQL_DATABASE:-fivex_check}
+      OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
+      OAUTH_REDIRECT_URI: ${OAUTH_REDIRECT_URI:-http://localhost:3000/auth/callback}
+      OWNER_OPEN_ID: ${OWNER_OPEN_ID}
+      SESSION_SECRET: ${SESSION_SECRET}
+      API_KEY: ${API_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - fivex-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: fivex-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - fivex-network
+    restart: unless-stopped
+    profiles:
+      - prod
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  fivex-network:
+    driver: bridge

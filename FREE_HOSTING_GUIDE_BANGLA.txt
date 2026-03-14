@@ -1,0 +1,196 @@
+================================================================================
+  FIVEX.CHECK প্রজেক্ট বিনামূল্যে হোস্ট করার সম্পূর্ণ গাইড (A to Z)
+  © 2026 XTRON | Discord: https://discord.gg/sQQXgYk8
+================================================================================
+
+এই গাইডে আপনি শিখবেন:
+• কিভাবে ইউজারদের জন্য Gmail ও Password সেট করবেন
+• কিভাবে পুরো প্রজেক্ট বিনামূল্যে হোস্ট করবেন (কোন এরর ছাড়া)
+
+
+================================================================================
+  অংশ ১: ইউজারদের জন্য Gmail ও Password সেট করা
+================================================================================
+
+প্রজেক্টে ইতিমধ্যে Email + Password দিয়ে লগইন সিস্টেম আছে। আপনি যেই 
+ইমেইল ও পাসওয়ার্ড দেবেন সেটা দিয়েই শুধু অ্যাক্সেস করা যাবে।
+
+কিভাবে সেট করবেন:
+
+১. প্রজেক্টের রুটে .env ফাইল খুলুন (নেইলে বানান)
+২. নিচের দুটো লাইন যোগ করুন:
+
+   ADMIN_EMAIL=আপনার_ইমেইল@gmail.com
+   ADMIN_PASSWORD=আপনার_শক্ত_পাসওয়ার্ড
+
+   উদাহরণ:
+   ADMIN_EMAIL=xtron.admin@gmail.com
+   ADMIN_PASSWORD=MySecure@Pass123
+
+৩. লকালে রান করার সময় এই .env পড়া হবে।
+
+৪. যখন ফ্রি হোস্ট করবেন (Railway, Render ইত্যাদি), সেখানে Environment 
+   Variables এ গিয়ে একই নামে যোগ করুন:
+   • ADMIN_EMAIL = আপনার ইমেইল
+   • ADMIN_PASSWORD = আপনার পাসওয়ার্ড
+
+৫. যে ইউজারদের অ্যাক্সেস দিতে চান, তাদেরকে এই ইমেইল ও পাসওয়ার্ড 
+   দিয়ে দেবেন। তারা /login পেজে গিয়ে ঢুকবে এবং ড্যাশবোর্ড একসেস পাবে।
+
+সাবধান: পাসওয়ার্ড শক্ত রাখুন। সাধারণ শব্দ দেবেন না। কমপক্ষে ৮+ অক্ষর, 
+বড়/ছোট অক্ষর, নম্বর ও বিশেষ চিহ্ন মিশিয়ে দিন।
+
+
+================================================================================
+  অংশ ২: পুরো প্রজেক্ট ফ্রিতে হোস্ট করা (কোন এরর ছাড়া)
+================================================================================
+
+এই প্রজেক্টটি full-stack — মানে ফ্রন্টেন্ড + ব্যাকেন্ড একসাথে। একটা সার্ভারে 
+ডিপ্লয় করলেই সব চলবে। আলাদা করে ফ্রন্টেন্ড ও ব্যাকেন্ড হোস্ট করার দরকার নেই।
+
+
+------- ধাপ ১: GitHub এ কোড আপলোড -------
+
+১. GitHub অ্যাকাউন্ট: https://github.com
+২. New Repository বানান
+৩. প্রজেক্ট ফোল্ডারে টার্মিনাল খুলে:
+
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git branch -M main
+   git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   git push -u origin main
+
+
+------- ধাপ ২: ডাটাবেস (PostgreSQL) ফ্রি নেওয়া -------
+
+Neon ব্যবহার করুন (সহজ ও ফ্রি):
+
+১. https://neon.tech — সাইন আপ (GitHub দিয়ে সহজ)
+২. New Project — Create
+৩. Connection string কপি করুন (postgresql://...?sslmode=require)
+৪. এই স্ট্রিং টা রেখে দিন — এটাই DATABASE_URL
+
+
+------- ধাপ ৩: Railway এ পুরো প্রজেক্ট ডিপ্লয় -------
+
+১. https://railway.app — GitHub দিয়ে লগইন
+২. New Project > Deploy from GitHub repo
+৩. আপনার FiveX.check রিপো সিলেক্ট করুন
+৪. Root Directory: খালি রাখুন (প্রজেক্ট রুটে আছে)
+৫. Build Command: npm install && npm run build
+   (বা pnpm install && pnpm run build যদি pnpm use করেন)
+৬. Start Command: npm run start (বা pnpm start)
+৭. Settings > Variables এ যান, Add Variable:
+
+   নাম              | মান
+   -----------------|------------------------------------------
+   DATABASE_URL     | আপনার Neon থেকে কপি করা connection string
+   ADMIN_EMAIL      | আপনার ইমেইল (যে দিয়ে লগইন করবেন)
+   ADMIN_PASSWORD   | আপনার পাসওয়ার্ড
+   NODE_ENV         | production
+
+৮. Deploy করুন। কয়েক মিনিট পর একটা URL পাবেন (যেমন: https://xxx.up.railway.app)
+৯. এই URL এ যান — আপনার সাইট চালু।
+
+যদি Build Command এ error আসে:
+• pnpm ব্যবহার করলে: pnpm install --frozen-lockfile && pnpm run build
+• npm: npm ci && npm run build
+
+
+------- ধাপ ৪: Render এ ডিপ্লয় (Railway এর বিকল্প) -------
+
+১. https://render.com — GitHub কানেক্ট করুন
+২. New > Web Service
+৩. আপনার রিপো সিলেক্ট করুন
+৪. Environment: Node
+৫. Build Command: npm install && npm run build
+৬. Start Command: npm run start
+৭. Environment Variables যোগ করুন: DATABASE_URL, ADMIN_EMAIL, ADMIN_PASSWORD
+৮. Deploy করুন। URL পাবেন (যেমন: https://xxx.onrender.com)
+
+
+------- ধাপ ৫: ডাটাবেস টেবিল তৈরি (প্রথমবার) -------
+
+কখনও কখনও প্রথম ডিপ্লয়ের পর টেবিল তৈরি হয় না। তখন:
+
+১. লকালে প্রজেক্ট রান করে নিচের কমান্ড চালান:
+
+   npm run db:push
+
+   অথবা package.json এ থাকলে:
+
+   pnpm run db:push
+
+২. এরপর আবার ডিপ্লয় করুন। অথবা Neon/Supabase এর SQL Editor এ গিয়ে 
+   আপনার drizzle/schema অনুযায়ী টেবিল বানাতে পারেন।
+
+
+------- ধাপ ৬: স্ক্যানার সফটওয়্যারে API URL সেট -------
+
+FiveXCheck_Scanner_Enhanced.py খুলে ওপরের দিকে দেখুন:
+
+   API_BASE_URL = "http://localhost:3000/api/trpc"
+
+এটাকে বদলে দিন:
+
+   API_BASE_URL = "https://আপনার-রেলওয়ে-ইউআরএল/api/trpc"
+
+উদাহরণ:
+
+   API_BASE_URL = "https://fivex-check.up.railway.app/api/trpc"
+
+তারপর স্ক্যানার চালিয়ে টেস্ট করুন।
+
+
+------- ধাপ ৭: চেকলিস্ট — সব ঠিক আছে কিনা -------
+
+□ GitHub এ কোড পুশ করা
+□ Neon এ PostgreSQL বানিয়ে DATABASE_URL নেওয়া
+□ Railway/Render এ ডিপ্লয় করা
+□ DATABASE_URL, ADMIN_EMAIL, ADMIN_PASSWORD Variables সেট করা
+□ সাইটের URL এ গিয়ে হোম পেজ লোড হচ্ছে
+□ /login এ গিয়ে আপনার ইমেইল ও পাসওয়ার্ড দিয়ে লগইন হচ্ছে
+□ লগইন পর ড্যাশবোর্ড (codes, results) কাজ করছে
+□ স্ক্যানার অ্যাপে API_BASE_URL আপডেট করা
+□ স্ক্যান রান করে রেজাল্ট ওয়েবসাইটে আসছে
+
+
+------- সাধারণ সমস্যা ও সমাধান -------
+
+• "Database not available":
+  → DATABASE_URL ঠিক আছে কিনা চেক করুন। Neon এ Connection string 
+    কপি করার সময় পুরো URL নিয়েছেন কিনা দেখুন।
+
+• লগইন করলেও আবার লগইন পেজে ফিরে আসে:
+  → Cookie/Session কাজ করছে কিনা দেখুন। Same-site, HTTPS নিশ্চিত করুন।
+  → Railway/Render এ COOKIE_DOMAIN বা অন্যান্য cookie সেটিং চেক করুন।
+
+• স্ক্যানার "Invalid scan code" বা connection error দেয়:
+  → স্ক্যানারে API_BASE_URL সঠিকভাবে (https://...) দিয়েছেন কিনা।
+  → সাইটে গিয়ে আগে একটা Scan Code জেনারেট করুন, সেই কোড দিয়ে টেস্ট করুন।
+
+• বাংলাদেশ টাইম ৬ ঘণ্টা এগিয়ে/পিছিয়ে:
+  → প্রজেক্টে ইতিমধ্যে BD time ঠিক করা আছে। নতুন ডিপ্লয়ের পর ঠিক হয়ে যাওয়ার কথা।
+
+• Build fail — "module not found" বা TypeScript error:
+  → package.json এ সব dependency আছে কিনা দেখুন।
+  → npm install বা pnpm install আবার চালান। Lock file আপ টু ডেট করুন।
+
+
+================================================================================
+  সংক্ষেপে যা করতে হবে
+================================================================================
+
+১. GitHub এ কোড আপলোড
+২. Neon এ ফ্রি PostgreSQL নিয়ে DATABASE_URL কপি করুন
+৩. Railway বা Render এ প্রজেক্ট ডিপ্লয় করুন
+৪. Variables: DATABASE_URL, ADMIN_EMAIL, ADMIN_PASSWORD সেট করুন
+৫. স্ক্যানার পাইথন ফাইলে API_BASE_URL আপনার লাইভ সাইটের URL দিন
+৬. ব্রাউজারে সাইট ও লগইন টেস্ট করুন
+
+এই ধাপগুলো মেনে করলে প্রজেক্ট ফ্রিতে কোন এরর ছাড়া রান করার কথা।
+আরও সাহায্য চাইলে Discord: https://discord.gg/sQQXgYk8
+
+================================================================================
